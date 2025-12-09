@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D関数ビジュアライザー - 偏微分学習ツール</title>
+    <meta name="description" content="3D関数を可視化し、偏微分を学ぶための教育用インタラクティブツール">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <div class="container">
+        <!-- ヘッダー -->
+        <header class="header">
+            <h1>3D関数ビジュアライザー</h1>
+            <p class="subtitle">偏微分を視覚的に理解するための教育ツール</p>
+        </header>
+
+        <!-- メインコンテンツ -->
+        <div class="main-content">
+            <!-- 3Dビューワー -->
+            <div class="viewer-container">
+                <canvas id="canvas3d"></canvas>
+
+                <!-- ビューコントロール -->
+                <div class="view-controls">
+                    <button class="view-btn" id="viewXY" title="XY平面から見る">
+                        <span>XY平面</span>
+                    </button>
+                    <button class="view-btn" id="viewXZ" title="XZ平面から見る">
+                        <span>XZ平面</span>
+                    </button>
+                    <button class="view-btn" id="viewYZ" title="YZ平面から見る">
+                        <span>YZ平面</span>
+                    </button>
+                    <button class="view-btn" id="viewReset" title="デフォルトビューに戻す">
+                        <span>リセット</span>
+                    </button>
+                </div>
+
+                <!-- 情報パネル -->
+                <div class="info-panel" id="infoPanel">
+                    <div class="info-item">
+                        <span class="info-label">関数:</span>
+                        <span class="info-value" id="currentFunction">z = x² + y²</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- コントロールパネル -->
+            <div class="control-panel">
+                <!-- 関数入力セクション -->
+                <div class="section">
+                    <h2>関数入力</h2>
+                    <div class="input-group">
+                        <label>z =</label>
+                        <input type="text" id="functionInput" value="x^2 + y^2" placeholder="例: x^2 + y^2">
+                        <button class="btn-primary" id="plotBtn">描画</button>
+                    </div>
+                    <div class="error-message" id="errorMessage"></div>
+                </div>
+
+                <!-- 仮想キーパッド -->
+                <div class="section">
+                    <h3>数式キーパッド</h3>
+                    <div class="keypad">
+                        <button class="key-btn" data-value="x">x</button>
+                        <button class="key-btn" data-value="y">y</button>
+                        <button class="key-btn" data-value="+">+</button>
+                        <button class="key-btn" data-value="-">−</button>
+                        <button class="key-btn" data-value="*">×</button>
+                        <button class="key-btn" data-value="/">÷</button>
+                        <button class="key-btn" data-value="^">x^y</button>
+                        <button class="key-btn" data-value="sqrt(">√</button>
+                        <button class="key-btn" data-value="sin(">sin</button>
+                        <button class="key-btn" data-value="cos(">cos</button>
+                        <button class="key-btn" data-value="tan(">tan</button>
+                        <button class="key-btn" data-value="exp(">e^x</button>
+                        <button class="key-btn" data-value="log(">log</button>
+                        <button class="key-btn" data-value="abs(">|x|</button>
+                        <button class="key-btn" data-value="(">(</button>
+                        <button class="key-btn" data-value=")">)</button>
+                        <button class="key-btn key-clear" id="clearBtn">クリア</button>
+                        <button class="key-btn key-delete" id="deleteBtn">⌫</button>
+                    </div>
+                </div>
+
+                <!-- 色設定 -->
+                <div class="section">
+                    <h3>曲面の色</h3>
+                    <div class="color-picker">
+                        <button class="color-btn" data-color="#ff4444" style="background: #ff4444;" title="赤"></button>
+                        <button class="color-btn" data-color="#4444ff" style="background: #4444ff;" title="青"></button>
+                        <button class="color-btn active" data-color="#44ff44" style="background: #44ff44;"
+                            title="緑"></button>
+                        <button class="color-btn" data-color="#ff44ff" style="background: #ff44ff;" title="紫"></button>
+                        <button class="color-btn" data-color="#ffaa44" style="background: #ffaa44;"
+                            title="オレンジ"></button>
+                        <input type="color" id="customColor" value="#44ff44" title="カスタム色">
+                    </div>
+                    <div class="opacity-control">
+                        <label>透明度: <span id="opacityValue">0.7</span></label>
+                        <input type="range" id="opacitySlider" min="0.1" max="1.0" step="0.1" value="0.7">
+                    </div>
+                </div>
+
+                <!-- 表示設定 -->
+                <div class="section">
+                    <h3>表示設定</h3>
+                    <div class="feature-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="showAxisLabels" checked>
+                            <span>軸ラベル(x, y, z)を表示</span>
+                        </label>
+                    </div>
+                    <div class="feature-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="showCoordinates" checked>
+                            <span>座標値(0, 5, 10)を表示</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- 教育機能 -->
+                <div class="section educational-features">
+                    <h3>偏微分学習機能</h3>
+
+                    <div class="feature-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="showTangentPlane">
+                            <span>接平面を表示</span>
+                        </label>
+                        <div class="feature-controls" id="tangentControls" style="display: none;">
+                            <label>点の座標:</label>
+                            <div class="coord-inputs">
+                                <input type="number" id="tangentX" value="0" step="0.5" placeholder="x">
+                                <input type="number" id="tangentY" value="0" step="0.5" placeholder="y">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="feature-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="showGradient">
+                            <span>勾配ベクトルを表示</span>
+                        </label>
+                    </div>
+
+                    <div class="feature-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="showCrossSection">
+                            <span>断面を表示</span>
+                        </label>
+                        <div class="feature-controls" id="crossSectionControls" style="display: none;">
+                            <select id="crossSectionAxis">
+                                <option value="x">x = 定数</option>
+                                <option value="y">y = 定数</option>
+                            </select>
+                            <input type="number" id="crossSectionValue" value="0" step="0.5" placeholder="値">
+                        </div>
+                    </div>
+
+                    <div class="derivative-display" id="derivativeDisplay" style="display: none;">
+                        <h4>偏微分値</h4>
+                        <div class="derivative-values">
+                            <div>∂f/∂x = <span id="dfdx">-</span></div>
+                            <div>∂f/∂y = <span id="dfdy">-</span></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- サンプル関数 -->
+                <div class="section">
+                    <h3>サンプル関数</h3>
+                    <div class="sample-functions">
+                        <button class="sample-btn" data-function="x^2 + y^2">放物面</button>
+                        <button class="sample-btn" data-function="x^2 - y^2">鞍点</button>
+                        <button class="sample-btn" data-function="sin(x) * cos(y)">波動</button>
+                        <button class="sample-btn" data-function="sqrt(x^2 + y^2)">円錐</button>
+                        <button class="sample-btn" data-function="exp(-(x^2 + y^2))">ガウス</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Three.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <!-- Math.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.11.0/math.min.js"></script>
+
+    <!-- アプリケーションスクリプト -->
+    <script src="derivatives.js"></script>
+    <script src="math-parser.js"></script>
+    <script src="renderer.js"></script>
+    <script src="app.js"></script>
+</body>
+
+</html>
